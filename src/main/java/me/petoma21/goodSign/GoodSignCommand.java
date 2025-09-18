@@ -22,7 +22,7 @@ public class GoodSignCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (args.length == 0) {
-            sender.sendMessage(formatMessage("&a=== GoodSign コマンド ==="));
+            sender.sendMessage(formatMessage("&a&l=== GoodSign コマンド ==="));
             sender.sendMessage(formatMessage("&e/gsign list <ユーザー名> &f- ユーザーのいいね看板一覧"));
             sender.sendMessage(formatMessage("&e/gsign gui &f- いいねランキングGUI"));
             sender.sendMessage(formatMessage("&e/gsign reload &f- 設定ファイルの再読み込み"));
@@ -42,19 +42,19 @@ public class GoodSignCommand implements CommandExecutor {
                 return handleReloadCommand(sender);
 
             default:
-                sender.sendMessage(formatMessage("&c不明なコマンドです。/gsign でヘルプを表示します。"));
+                sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &c&l不明なコマンドです。&e&l/gsign &f&lでヘルプを表示します。"));
                 return true;
         }
     }
 
     private boolean handleListCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(formatMessage("&c使用方法: /gsign list <ユーザー名>"));
+            sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &c&l使用方法: /gsign list <ユーザー名>"));
             return true;
         }
 
         if (!sender.hasPermission("goodsign.list")) {
-            sender.sendMessage(formatMessage("&cこのコマンドを使用する権限がありません！"));
+            sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &c&lこのコマンドを使用する権限がありません！"));
             return true;
         }
 
@@ -62,11 +62,11 @@ public class GoodSignCommand implements CommandExecutor {
         List<GoodSignData> userSigns = signManager.getUserSigns(targetUser);
 
         if (userSigns.isEmpty()) {
-            sender.sendMessage(formatMessage("&c" + targetUser + " のいいね看板は見つかりませんでした。"));
+            sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &c&l" + targetUser + " のいいね看板は見つかりませんでした。"));
             return true;
         }
 
-        sender.sendMessage(formatMessage("&a=== " + targetUser + " のいいね看板一覧 ==="));
+        sender.sendMessage(formatMessage("&a&l=== &6" + targetUser + " &a&lのいいね看板一覧 ==="));
         for (int i = 0; i < userSigns.size(); i++) {
             GoodSignData signData = userSigns.get(i);
             sender.sendMessage(formatMessage("&e" + (i + 1) + ". &f" + signData.getTitle()));
@@ -74,37 +74,37 @@ public class GoodSignCommand implements CommandExecutor {
             sender.sendMessage(formatMessage("   &7いいね数: &c" + signData.getLikes()));
             sender.sendMessage("");
         }
-        sender.sendMessage(formatMessage("&a合計: " + userSigns.size() + "個"));
+        sender.sendMessage(formatMessage("&f&l合計&7: &b&l" + userSigns.size() + "&e&lいいね"));
 
         return true;
     }
 
     private boolean handleGUICommand(CommandSender sender) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(formatMessage("&cこのコマンドはプレイヤーのみ実行できます！"));
+            sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &c&lこのコマンドはプレイヤーのみ実行できます！"));
             return true;
         }
 
         if (!sender.hasPermission("goodsign.gui")) {
-            sender.sendMessage(formatMessage("&cこのコマンドを使用する権限がありません！"));
+            sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &c&lこのコマンドを使用する権限がありません！"));
             return true;
         }
 
         Player player = (Player) sender;
         rankingGUI.openRankingGUI(player);
-        player.sendMessage(formatMessage("&aいいねランキングを開きました！"));
+        player.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &a&lいいねランキングを開きました！"));
 
         return true;
     }
 
     private boolean handleReloadCommand(CommandSender sender) {
         if (!sender.hasPermission("goodsign.reload")) {
-            sender.sendMessage(formatMessage("&cこのコマンドを使用する権限がありません！"));
+            sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &c&lこのコマンドを使用する権限がありません！"));
             return true;
         }
 
         configManager.reload();
-        sender.sendMessage(formatMessage("&a設定ファイルを再読み込みしました！"));
+        sender.sendMessage(formatMessage("&7&l[&e&lGsign&7&l] &a&l設定ファイルを再読み込みしました！"));
 
         return true;
     }
