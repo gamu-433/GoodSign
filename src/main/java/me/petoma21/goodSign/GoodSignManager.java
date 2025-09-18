@@ -36,13 +36,14 @@ public class GoodSignManager {
             return false;
         }
 
+        // 権限チェック（OP以外の場合）
         if (!creator.isOp()) {
             ConfigManager config = new ConfigManager((GoodSign) plugin);
             int maxSigns = config.getMaxSignsPerUser();
             int currentSigns = getUserSignCount(creator.getName());
 
             if (currentSigns >= maxSigns) {
-                creator.sendMessage(formatMessage("&7[&c!&7] &c最大" + maxSigns + "個までしかいいね看板を作成できません！"));
+                creator.sendMessage(formatMessage("&c最大" + maxSigns + "個までしかいいね看板を作成できません！"));
                 return false;
             }
         }
@@ -72,7 +73,7 @@ public class GoodSignManager {
         Set<String> likedSigns = playerLikes.getOrDefault(playerName, new HashSet<>());
 
         if (likedSigns.contains(locationKey)) {
-            player.sendMessage(formatMessage("&7[&c!&7] &c&lこの看板にはすで&f&lにいいね&c&lをしています！"));
+            player.sendMessage(formatMessage("&c既にいいねしているため、できません！"));
             return false;
         }
 
@@ -83,9 +84,10 @@ public class GoodSignManager {
         updateSignDisplay(signData);
         saveData();
 
-        player.sendMessage(formatMessage("&7[&b!&7] &6" + signData.getOwnerName() + " &f&lさんにいいねをしました！"));
+        player.sendMessage(formatMessage("&a" + signData.getOwnerName() + " さんにいいねをしました！"));
 
-        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 2.0f);
+        // いいね成功時にレベルアップ音を再生
+        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 
         return true;
     }
@@ -95,9 +97,10 @@ public class GoodSignManager {
         GoodSignData signData = goodSigns.get(locationKey);
 
         if (signData == null) {
-            return true;
+            return true; // 通常の看板
         }
 
+        // 作成者またはOP権限のみ破壊可能
         return player.isOp() || player.getName().equals(signData.getCreator());
     }
 
@@ -105,6 +108,7 @@ public class GoodSignManager {
         String locationKey = getLocationKey(location);
         goodSigns.remove(locationKey);
 
+        // プレイヤーのいいね履歴からも削除
         for (Set<String> likedSigns : playerLikes.values()) {
             likedSigns.remove(locationKey);
         }
@@ -126,6 +130,10 @@ public class GoodSignManager {
         return userSigns;
     }
 
+    public Collection<GoodSignData> getAllGoodSigns() {
+        return goodSigns.values();
+    }
+
     private int getUserSignCount(String creatorName) {
         int count = 0;
         for (GoodSignData signData : goodSigns.values()) {
@@ -144,6 +152,7 @@ public class GoodSignManager {
 
         Sign sign = (Sign) block.getState();
 
+        // 看板の明度を判定
         String textColor = getTextColorForSign(sign);
 
         sign.setLine(0, formatMessage("&a&l" + signData.getTitle()));
@@ -157,6 +166,7 @@ public class GoodSignManager {
     private String getTextColorForSign(Sign sign) {
         Material material = sign.getBlock().getType();
 
+        // 暗い色の看板の場合は白文字、明るい色の場合は黒文字
         switch (material) {
             case DARK_OAK_SIGN:
             case DARK_OAK_WALL_SIGN:
@@ -190,6 +200,7 @@ public class GoodSignManager {
 
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
 
+        // 看板データの読み込み
         if (dataConfig.contains("signs")) {
             for (String key : dataConfig.getConfigurationSection("signs").getKeys(false)) {
                 try {
@@ -203,6 +214,7 @@ public class GoodSignManager {
             }
         }
 
+        // いいね履歴の読み込み
         if (dataConfig.contains("player_likes")) {
             for (String playerName : dataConfig.getConfigurationSection("player_likes").getKeys(false)) {
                 List<String> likedSigns = dataConfig.getStringList("player_likes." + playerName);
@@ -216,11 +228,13 @@ public class GoodSignManager {
             dataConfig = new YamlConfiguration();
         }
 
+        // 看板データの保存
         dataConfig.set("signs", null);
         for (Map.Entry<String, GoodSignData> entry : goodSigns.entrySet()) {
             entry.getValue().saveToConfig(dataConfig, "signs." + entry.getKey());
         }
 
+        // いいね履歴の保存
         dataConfig.set("player_likes", null);
         for (Map.Entry<String, Set<String>> entry : playerLikes.entrySet()) {
             dataConfig.set("player_likes." + entry.getKey(), new ArrayList<>(entry.getValue()));

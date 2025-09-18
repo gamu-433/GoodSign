@@ -7,7 +7,7 @@ author: petoma.
 commands:
   gsign:
     description: GoodSignプラグインのコマンド
-    usage: /<command> [list|reload]
+    usage: /<command> [list|gui|reload]
     permission: goodsign.use
 
 permissions:
@@ -16,9 +16,12 @@ permissions:
     default: true
   goodsign.create:
     description: いいね看板を作成する権限
-    default: op
+    default: true
   goodsign.list:
     description: ユーザーのいいね看板一覧を表示する権限
+    default: op
+  goodsign.gui:
+    description: いいねランキングGUIを表示する権限
     default: op
   goodsign.reload:
     description: 設定ファイルを再読み込みする権限

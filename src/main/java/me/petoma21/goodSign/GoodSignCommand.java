@@ -1,8 +1,8 @@
 package me.petoma21.goodSign;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 
@@ -10,10 +10,12 @@ public class GoodSignCommand implements CommandExecutor {
 
     private final GoodSignManager signManager;
     private final ConfigManager configManager;
+    private final RankingGUI rankingGUI;
 
-    public GoodSignCommand(GoodSignManager signManager, ConfigManager configManager) {
+    public GoodSignCommand(GoodSignManager signManager, ConfigManager configManager, RankingGUI rankingGUI) {
         this.signManager = signManager;
         this.configManager = configManager;
+        this.rankingGUI = rankingGUI;
     }
 
     @Override
@@ -22,6 +24,7 @@ public class GoodSignCommand implements CommandExecutor {
         if (args.length == 0) {
             sender.sendMessage(formatMessage("&a=== GoodSign コマンド ==="));
             sender.sendMessage(formatMessage("&e/gsign list <ユーザー名> &f- ユーザーのいいね看板一覧"));
+            sender.sendMessage(formatMessage("&e/gsign gui &f- いいねランキングGUI"));
             sender.sendMessage(formatMessage("&e/gsign reload &f- 設定ファイルの再読み込み"));
             return true;
         }
@@ -31,6 +34,9 @@ public class GoodSignCommand implements CommandExecutor {
         switch (subCommand) {
             case "list":
                 return handleListCommand(sender, args);
+
+            case "gui":
+                return handleGUICommand(sender);
 
             case "reload":
                 return handleReloadCommand(sender);
@@ -69,6 +75,24 @@ public class GoodSignCommand implements CommandExecutor {
             sender.sendMessage("");
         }
         sender.sendMessage(formatMessage("&a合計: " + userSigns.size() + "個"));
+
+        return true;
+    }
+
+    private boolean handleGUICommand(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(formatMessage("&cこのコマンドはプレイヤーのみ実行できます！"));
+            return true;
+        }
+
+        if (!sender.hasPermission("goodsign.gui")) {
+            sender.sendMessage(formatMessage("&cこのコマンドを使用する権限がありません！"));
+            return true;
+        }
+
+        Player player = (Player) sender;
+        rankingGUI.openRankingGUI(player);
+        player.sendMessage(formatMessage("&aいいねランキングを開きました！"));
 
         return true;
     }
