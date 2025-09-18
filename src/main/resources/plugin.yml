@@ -1,0 +1,25 @@
+name: GoodSign
+version: 1.0.0
+main: me.petoma21.goodSign.GoodSign
+api-version: '1.21'
+author: petoma.
+
+commands:
+  gsign:
+    description: GoodSignプラグインのコマンド
+    usage: /<command> [list|reload]
+    permission: goodsign.use
+
+permissions:
+  goodsign.use:
+    description: 基本的なGoodSignコマンドを使用する権限
+    default: true
+  goodsign.create:
+    description: いいね看板を作成する権限
+    default: op
+  goodsign.list:
+    description: ユーザーのいいね看板一覧を表示する権限
+    default: op
+  goodsign.reload:
+    description: 設定ファイルを再読み込みする権限
+    default: op
