@@ -22,20 +22,20 @@ public class RankingGUI {
         // ランキングデータを取得
         List<PlayerRankingData> rankingData = calculateRanking();
 
-        // GUIのサイズを決定（最大54スロット）
-        int guiSize = Math.min(54, Math.max(9, ((rankingData.size() + 8) / 9) * 9));
+        // ラージチェストサイズ（54スロット）で固定
+        int guiSize = 54;
 
         Inventory gui = Bukkit.createInventory(null, guiSize, formatMessage("&6&lいいねランキング"));
 
-        // ランキングアイテムを追加
-        for (int i = 0; i < Math.min(rankingData.size(), guiSize - 9); i++) {
+        // ランキングアイテムを追加（最大45個まで、下段9スロットは装飾用）
+        for (int i = 0; i < Math.min(rankingData.size(), 45); i++) {
             PlayerRankingData data = rankingData.get(i);
             ItemStack item = createRankingItem(data, i + 1);
             gui.setItem(i, item);
         }
 
         // 下部に装飾アイテムを追加
-        addDecorationItems(gui, guiSize);
+        addDecorationItems(gui);
 
         player.openInventory(gui);
     }
@@ -123,16 +123,16 @@ public class RankingGUI {
         }
     }
 
-    private void addDecorationItems(Inventory gui, int guiSize) {
-        // 最下段に装飾アイテムを配置
-        int lastRowStart = guiSize - 9;
+    private void addDecorationItems(Inventory gui) {
+        // 最下段（45-53）に装飾アイテムを配置
+        int lastRowStart = 45;
 
         // 閉じるボタン
         ItemStack closeItem = new ItemStack(Material.BARRIER);
         ItemMeta closeMeta = closeItem.getItemMeta();
         closeMeta.setDisplayName(formatMessage("&c&lGUIを閉じる"));
         closeItem.setItemMeta(closeMeta);
-        gui.setItem(lastRowStart + 4, closeItem);
+        gui.setItem(49, closeItem); // 中央に配置
 
         // 更新ボタン
         ItemStack refreshItem = new ItemStack(Material.CLOCK);
@@ -142,7 +142,7 @@ public class RankingGUI {
         refreshLore.add(formatMessage("&7クリックでランキングを更新"));
         refreshMeta.setLore(refreshLore);
         refreshItem.setItemMeta(refreshMeta);
-        gui.setItem(lastRowStart + 8, refreshItem);
+        gui.setItem(53, refreshItem); // 右端に配置
 
         // 装飾用ガラス
         ItemStack glass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
@@ -150,7 +150,8 @@ public class RankingGUI {
         glassMeta.setDisplayName(" ");
         glass.setItemMeta(glassMeta);
 
-        for (int i = lastRowStart; i < guiSize; i++) {
+        // 最下段の空きスロットに配置
+        for (int i = lastRowStart; i < 54; i++) {
             if (gui.getItem(i) == null) {
                 gui.setItem(i, glass);
             }

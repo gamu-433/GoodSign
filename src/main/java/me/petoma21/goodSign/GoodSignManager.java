@@ -7,6 +7,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,10 +56,35 @@ public class GoodSignManager {
 
         GoodSignData signData = new GoodSignData(location, title, ownerName, creator.getName(), 0);
         goodSigns.put(locationKey, signData);
-        updateSignDisplay(signData);
-        saveData();
 
+// ここで plugin, signData などを final 変数にして Runnable で使えるようにする
+        final GoodSignData finalSignData = signData;
+        final Block finalBlock = block;
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!(finalBlock.getState() instanceof Sign)) {
+                    return;
+                }
+                Sign sign = (Sign) finalBlock.getState();
+
+                // 看板の明度を判定
+                String textColor = getTextColorForSign(sign);
+
+                sign.setLine(0, formatMessage("&a&l" + finalSignData.getTitle()));
+                sign.setLine(1, formatMessage(textColor + "&l" + finalSignData.getOwnerName()));
+                sign.setLine(2, "");
+                sign.setLine(3, formatMessage("&c&l0 " + textColor + "&lいいね"));
+
+                sign.update();
+                saveData();
+            }
+        }.runTaskLater(plugin, 5L);
+
+        creator.sendMessage(formatMessage("&aいいね看板を作成しました！"));
         return true;
+
     }
 
     public boolean addLike(Location location, Player player) {
@@ -157,8 +183,8 @@ public class GoodSignManager {
 
         sign.setLine(0, formatMessage("&a&l" + signData.getTitle()));
         sign.setLine(1, formatMessage(textColor + "&l" + signData.getOwnerName()));
-        sign.setLine(2, formatMessage("&c&l" + signData.getLikes() + "  " + textColor + "&lいいね"));
-        sign.setLine(3, "");
+        sign.setLine(2, "");
+        sign.setLine(3, formatMessage("&c&l" + signData.getLikes() + "  " + textColor + "&lいいね"));
 
         sign.update();
     }
